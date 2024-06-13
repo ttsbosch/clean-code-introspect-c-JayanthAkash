@@ -2,64 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <TradeRecord.h>
-#include <Converters.h>
-#include <SplitString.h>
-
-char** SplitString(const char* InputString, char delimiter) {
-    int NumberOfDelimiters = 0;
-    const char* inputStringIterPtr = InputString;
-    while (*inputStringIterPtr != '\0') {
-        if (*inputStringIterPtr++ == delimiter) {
-            NumberOfDelimiters++;
-        }
-    }
-
-    char** tokens = (char**)malloc(sizeof(char*) * (NumberOfDelimiters + 2));
-    int indexOfTokens = 0;
-    inputStringIterPtr = InputString;
-    char* token = (char*)malloc(strlen(InputString) + 1);
-    int indexOfToken = 0;
-    while (*inputStringIterPtr != '\0') {
-        if (*inputStringIterPtr == delimiter) {
-            token[indexOfToken] = '\0';
-            tokens[indexOfTokens++] = strdup(token);
-            indexOfToken = 0;
-        } else {
-            token[indexOfToken++] = *inputStringIterPtr;
-        }
-        inputStringIterPtr++;
-    }
-    token[indexOfToken] = '\0';
-    tokens[indexOfTokens++] = strdup(token);
-    tokens[indexOfTokens] = NULL;
-    free(token);
-    return tokens;
-}
-
-int tryToExtractIntFromString(const char* inputString, int* extractedInt) {
-    char* splitedString;
-    *extractedInt = strtol(inputString, &splitedString, 10);
-    if (splitedString == inputString) {
-        return 0;
-    }
-    return 1;
-}
-
-int tryToExtractDoubleFromString(const char* inputString, double* extractedDouble) {
-    char* splitedString;
-    *extractedDouble = strtod(inputString, &splitedString);
-    if (splitedString == inputString) {
-        return 0;
-    }
-    return 1;
-}
+#include "TradeRecord.h"
+#include "Converters.h"
+#include "SplitString.h"
 
 void convertCsvToXml(FILE* stream) {
     char line[1024];
     TradeRecord tradeObjects[1024];
     int lineCount = 0;
     int tradeCount = 0;
+    int LotSize = 1;
 
     while (fgets(line, sizeof(line), stream)) {
         char* fields[3];
