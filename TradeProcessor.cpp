@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <TradeRecord.h>
+#include <Converters.h>
+#include <SplitString.h>
 
 char** SplitString(const char* InputString, char delimiter) {
     int NumberOfDelimiters = 0;
