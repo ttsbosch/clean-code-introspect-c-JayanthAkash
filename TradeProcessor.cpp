@@ -107,10 +107,10 @@ void convertCsvToXml(FILE* stream) {
     fprintf(outFile, "<TradeRecords>\n");
     for (int index = 0; index < tradeCount; index++) {
         fprintf(outFile, "\t<TradeRecord>\n");
-        fprintf(outFile, "\t\t<SourceCurrency>%s</SourceCurrency>\n", tradeObjects[i].SourceCurrency);
-        fprintf(outFile, "\t\t<DestinationCurrency>%s</DestinationCurrency>\n", tradeObjects[i].DestinationCurrency);
-        fprintf(outFile, "\t\t<Lots>%d</Lots>\n", tradeObjects[i].Lots);
-        fprintf(outFile, "\t\t<Price>%f</Price>\n", tradeObjects[i].Price);
+        fprintf(outFile, "\t\t<SourceCurrency>%s</SourceCurrency>\n", tradeObjects[index].SourceCurrency);
+        fprintf(outFile, "\t\t<DestinationCurrency>%s</DestinationCurrency>\n", tradeObjects[index].DestinationCurrency);
+        fprintf(outFile, "\t\t<Lots>%d</Lots>\n", tradeObjects[index].Lots);
+        fprintf(outFile, "\t\t<Price>%f</Price>\n", tradeObjects[index].Price);
         fprintf(outFile, "\t</TradeRecord>\n");
     }
     fprintf(outFile, "</TradeRecords>");
