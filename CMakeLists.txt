@@ -20,7 +20,6 @@ add_executable(
   cleancoder
   CsvToXmlTradeCoversion.cpp
   Converters.cpp
-  SplitString.cpp
   CsvToXmlTradeCoversion.Tests.cpp
 )
 target_link_libraries(
