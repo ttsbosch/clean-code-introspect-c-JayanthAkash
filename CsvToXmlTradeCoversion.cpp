@@ -4,7 +4,6 @@
 #include <errno.h>
 #include "TradeRecord.h"
 #include "Converters.h"
-#include "SplitString.h"
 
 // Function to tokenize a line into fields
 bool tokenizeLine(char *line, char *fields[], int expectedFields) {
