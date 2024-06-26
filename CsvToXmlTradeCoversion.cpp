@@ -5,7 +5,6 @@
 #include "TradeRecord.h"
 #include "Converters.h"
 
-// Function to tokenize a line into fields
 bool tokenizeLine(char *line, char *fields[], int expectedFields) {
     int fieldCount = 0;
     char *token = strtok(line, ",");
@@ -16,26 +15,38 @@ bool tokenizeLine(char *line, char *fields[], int expectedFields) {
     return fieldCount == expectedFields;
 }
 
-// Function to validate fields
-bool validateFields(char *fields[], int lineCount) {
-    if (strlen(fields[0]) != 6) {
-        fprintf(stderr, "WARN: Trade currencies on line %d malformed: '%s'\n", lineCount, fields[0]);
-        return false;
-    }
-    int tradeAmount;
-    if (!tryToExtractIntFromString(fields[1], &tradeAmount)) {
-        fprintf(stderr, "WARN: Trade amount on line %d not a valid integer: '%s'\n", lineCount, fields[1]);
-        return false;
-    }
-    double tradePrice;
-    if (!tryToExtractDoubleFromString(fields[2], &tradePrice)) {
-        fprintf(stderr, "WARN: Trade price on line %d not a valid decimal: '%s'\n", lineCount, fields[2]);
+bool isCurrencyValid(const char *currency, int lineCount) {
+    if (strlen(currency) != 6) {
+        fprintf(stderr, "WARN: Trade currencies on line %d malformed: '%s'\n", lineCount, currency);
         return false;
     }
     return true;
 }
 
-// Function to extract trade data from fields and populate TradeRecord
+bool isTradeAmountValid(const char *amountStr, int lineCount) {
+    int tradeAmount;
+    if (!tryToExtractIntFromString(amountStr, &tradeAmount)) {
+        fprintf(stderr, "WARN: Trade amount on line %d not a valid integer: '%s'\n", lineCount, amountStr);
+        return false;
+    }
+    return true;
+}
+
+bool isTradePriceValid(const char *priceStr, int lineCount) {
+    double tradePrice;
+    if (!tryToExtractDoubleFromString(priceStr, &tradePrice)) {
+        fprintf(stderr, "WARN: Trade price on line %d not a valid decimal: '%s'\n", lineCount, priceStr);
+        return false;
+    }
+    return true;
+}
+
+bool validateFields(char *fields[], int lineCount) {
+    return isCurrencyValid(fields[0], lineCount) &&
+           isTradeAmountValid(fields[1], lineCount) &&
+           isTradePriceValid(fields[2], lineCount);
+}
+
 void extractTradeData(char *fields[], TradeRecord *trade, int LotSize) {
     strncpy(trade->SourceCurrency, fields[0], 3);
     trade->SourceCurrency[3] = '\0';
@@ -61,6 +72,19 @@ void writeTradesToXml(TradeRecord *tradeObjects, int tradeCount) {
     fclose(outFile);
 }
 
+void processLine(char *line, TradeRecord *tradeObjects, int *tradeCount, int lineCount, int LotSize) {
+    char *fields[3];
+    if (!tokenizeLine(line, fields, 3)) {
+        fprintf(stderr, "WARN: Line %d malformed. Incorrect number of fields.\n", lineCount);
+        return;
+    }
+    if (!validateFields(fields, lineCount)) {
+        return;
+    }
+    extractTradeData(fields, &tradeObjects[*tradeCount], LotSize);
+    (*tradeCount)++;
+}
+
 void convertCsvToXml(FILE *stream) {
     char line[1024];
     TradeRecord tradeObjects[1024];
@@ -69,17 +93,8 @@ void convertCsvToXml(FILE *stream) {
     const int LotSize = 1;
 
     while (fgets(line, sizeof(line), stream)) {
-        char *fields[3];
         lineCount++;
-        if (!tokenizeLine(line, fields, 3)) {
-            fprintf(stderr, "WARN: Line %d malformed. Incorrect number of fields.\n", lineCount);
-            continue;
-        }
-        if (!validateFields(fields, lineCount)) {
-            continue;
-        }
-        extractTradeData(fields, &tradeObjects[tradeCount], LotSize);
-        tradeCount++;
+        processLine(line, tradeObjects, &tradeCount, lineCount, LotSize);
     }
 
     writeTradesToXml(tradeObjects, tradeCount);
